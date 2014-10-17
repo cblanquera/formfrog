@@ -16,7 +16,8 @@
   	"edenjs": "0.0.23"
   },
   "devDependencies": {
-    "mocha": "1.21.4"
+    "mocha": "1.21.4",
+    "mocha-jshint": "0.0.9"
   },
   "bugs": {
     "url": "https://github.com/cblanquera/formfrog/issues"

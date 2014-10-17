@@ -1,3 +1,31 @@
-var eden = require('edenjs');
+/*
+ * This file is part a custom application package.
+ * (c) 2014-2015 Openovate Labs
+ */
 
-console.log(eden().String().ucWords('this is sparta'));
+/* Get Application
+-------------------------------*/
+require('./controller')()
+
+/* Set Paths
+-------------------------------*/
+.setPaths()
+/* Trigger Init Event
+-------------------------------*/
+.trigger('init')
+
+/* Set Database
+-------------------------------*/
+.setDatabases()
+
+/* Trigger Database Event
+-------------------------------*/
+.trigger('database')
+
+/* Start Server
+-------------------------------*/
+.startServer()
+
+/* Trigger Start Event
+-------------------------------*/
+.trigger('start');
