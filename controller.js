@@ -1,6 +1,8 @@
 module.exports = require('edenjs').extend(function() {
 	/* Require
 	-------------------------------*/
+	var separator = require('path').sep;
+	
 	/* Constants
 	-------------------------------*/
 	/* Public Properties
@@ -26,7 +28,7 @@ module.exports = require('edenjs').extend(function() {
 	 * @return this
 	 */
 	this.config = function(key) {
-		return require(this._paths.config + '/' + key);
+		return require(this._paths.config + separator + key);
 	};
 	
 	/**
@@ -120,11 +122,11 @@ module.exports = require('edenjs').extend(function() {
 	 */
 	this.setPaths = function() {
 		this.path('root'		, __dirname)
-			.path('config'		, __dirname + '/config')
-			.path('action'		, __dirname + '/action')
-			.path('template'	, __dirname + '/template')
-			.path('event'		, __dirname + '/event')
-			.path('upload'		, __dirname + '/upload');
+			.path('config'		, __dirname + separator + 'config')
+			.path('page'		, __dirname + separator + 'page')
+			.path('template'	, __dirname + separator + 'template')
+			.path('event'		, __dirname + separator + 'event')
+			.path('upload'		, __dirname + separator + 'upload');
 		
 		return this;
 	};
@@ -139,14 +141,35 @@ module.exports = require('edenjs').extend(function() {
 	this.requestStart = function(request, response) {
 		response.processing = true;
 		
-		var path 		= request.path;
-		var pathArray 	= request.pathArray;
-		var variables 	= [];
-		var page 		= 'index';
+		//trim the prefix
+		var root 		= this.path('page'),
+			path 		= request.path,
+			buffer 		= path.split(separator),
+			page 		= root + separator + 'index',
+			variables 	= [];
 		
-		//
+		//traverse backwards to determine the correct action
+		while(buffer.length > 1) {
+			//if this is an actual file
+			if(this.File(root + buffer.join(separator) + '.js').isFile()) {
+				//this is the action we want
+				page = root + buffer.join(separator);
+				break;
+			}
+			
+			variables.unshift(buffer.pop());
+		}
 		
-		response.page = '';//whatever we determined as the action that should be loaded
+		//set the variables
+		request.variables = variables;
+		
+		//call it, store it in response
+		response.page = require(page)(this); 
+		
+		//call the request now, if it exists
+		if(typeof response.page.start === 'function') {
+			response.page.start(request, response);
+		}
 		
 		return this;
 	};
