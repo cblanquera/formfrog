@@ -146,6 +146,8 @@ module.exports = require('edenjs').extend(function() {
 		
 		//
 		
+		response.page = '';//whatever we determined as the action that should be loaded
+		
 		return this;
 	};
 	
@@ -157,7 +159,9 @@ module.exports = require('edenjs').extend(function() {
 	 * @return this
 	 */
 	this.requestEnd = function(request, response) {
-		
+		if(typeof response.page.end === 'function') {
+			response.page.end(request, response);
+		}
 		
 		return this;
 	};
