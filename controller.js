@@ -25,7 +25,9 @@ module.exports = require('edenjs').extend(function() {
 	 * @param string
 	 * @return this
 	 */
-	this.config = function(key) {};
+	this.config = function(key) {
+		return require(this._paths.config + '/' + key);
+	};
 	
 	/**
 	 * Returns a database connection
@@ -34,7 +36,14 @@ module.exports = require('edenjs').extend(function() {
 	 * @param string
 	 * @return object
 	 */
-	this.database = function(key) {};
+	this.database = function(key) {
+		//if there is no database
+		if(typeof this._databases[key] === 'undefined') {
+			return this._database;
+		}
+		
+		return this._databases[key];
+	};
 	
 	/**
 	 * Returns the path given the key
@@ -42,21 +51,83 @@ module.exports = require('edenjs').extend(function() {
 	 * @param string
 	 * @return this
 	 */
-	this.path = function(key, value) {};
+	this.path = function(key, value) {
+		if(value) {
+			this._paths[key] = value;
+			return this;
+		}
+		
+		return this._paths[key];
+	};
 	
 	/**
 	 * Save any database info in memory
 	 *
 	 * @return this
 	 */
-	this.setDatabases = function() {};
+	this.setDatabases = function() {
+		var databases = this.config('database'), database;
+		
+		for(var key in databases) {
+			if(databases.hasOwnProperty(key)) {
+				database = databases[key];
+				
+				switch(database.type) {
+					case 'mongo':
+						this._databases[key] = this.Mongo(
+							database.host, 
+							database.port, 
+							database.name);
+						
+						break;
+					case 'mysql':
+						this._databases[key] = this.Mysql(
+							database.host, 
+							database.port, 
+							database.name,
+							database.user,
+							database.pass);
+						
+						break;
+					case 'postgres':
+						this._databases[key] = this.Postgres(
+							database.host, 
+							database.port, 
+							database.name,
+							database.user,
+							database.pass);
+						
+						break;
+					case 'sqlite':
+						this._databases[key] = this.Postgres(database.file);
+						
+						break;
+				}
+				
+				if(database.default) {
+					this._database = this._databases[key];
+				}
+			}
+		}
+		
+		return this;
+	};
 	
 	/**
 	 * Set paths
 	 *
 	 * @return this
 	 */
-	this.setPaths = function() {};
+	this.setPaths = function() {
+		this.path('root'		, __dirname)
+			.path('config'		, __dirname + '/config')
+			.path('action'		, __dirname + '/action')
+			.path('template'	, __dirname + '/template')
+			.path('event'		, __dirname + '/event')
+			.path('upload'		, __dirname + '/upload');
+		
+		return this;
+	};
 	
 	/**
 	 * Called when a request has started
@@ -65,7 +136,11 @@ module.exports = require('edenjs').extend(function() {
 	 * @param object response object
 	 * @return this
 	 */
-	this.requestStart = function(request, response) {};
+	this.requestStart = function(request, response) {
+		response.processing = true;
+		
+		return this;
+	};
 	
 	/**
 	 * Called when a request has ended
@@ -74,7 +149,13 @@ module.exports = require('edenjs').extend(function() {
 	 * @param object response object
 	 * @return this
 	 */
-	this.requestEnd = function(request, response) {};
+	this.requestEnd = function(request, response) {
+		response.message = 'hi';
+		
+		this.trigger('server-response', request, response);
+		
+		return this;
+	};
 	
 	/**
 	 * Process to start server
