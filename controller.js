@@ -139,6 +139,13 @@ module.exports = require('edenjs').extend(function() {
 	this.requestStart = function(request, response) {
 		response.processing = true;
 		
+		var path 		= request.path;
+		var pathArray 	= request.pathArray;
+		var variables 	= [];
+		var page 		= 'index';
+		
+		//
+		
 		return this;
 	};
 	
@@ -150,9 +157,7 @@ module.exports = require('edenjs').extend(function() {
 	 * @return this
 	 */
 	this.requestEnd = function(request, response) {
-		response.message = 'hi';
 		
-		this.trigger('server-response', request, response);
 		
 		return this;
 	};
