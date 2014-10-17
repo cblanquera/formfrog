@@ -1,0 +1,25 @@
+{
+  "name": "formfrog",
+  "version": "0.0.1",
+  "description": "submit while getting froggy",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --harmony"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cblanquera/formfrog.git"
+  },
+  "author": "Chris",
+  "license": "MIT",
+  "dependencies": {
+  	"edenjs": "0.0.23"
+  },
+  "devDependencies": {
+    "mocha": "1.21.4"
+  },
+  "bugs": {
+    "url": "https://github.com/cblanquera/formfrog/issues"
+  },
+  "homepage": "https://github.com/cblanquera/formfrog"
+}
