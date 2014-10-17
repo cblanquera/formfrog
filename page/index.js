@@ -1,6 +1,8 @@
 module.exports = require('edenjs').extend(function() {
 	/* Require
 	-------------------------------*/
+	var template = require('handlebars');
+	
 	/* Constants
 	-------------------------------*/
 	/* Public Properties
@@ -8,6 +10,7 @@ module.exports = require('edenjs').extend(function() {
 	/* Protected Properties
 	-------------------------------*/
 	this._controller = null;
+	this._template = '/index.html';
 	
 	/* Private Properties
 	-------------------------------*/
@@ -19,13 +22,28 @@ module.exports = require('edenjs').extend(function() {
 	
 	/* Public Methods
 	-------------------------------*/
-	this.start = function(request, response) {
-		response.message = 'start';
-	};
-	
 	this.end = function(request, response) {
-		response.message += 'end';
-		this._controller.trigger('server-response', request, response);
+		this.sync(function(next) {
+			var path = this._controller.path('template') + this._template;
+			
+			this.File(path).getContent(next);
+		})
+		
+		.then(function(error, content, next) {
+			this._controller
+				.database()
+				.search('sample')
+				.getRows(next.bind(null, content.toString()))
+		})
+		
+		.then(function(content, error, rows) {
+			rows = rows || [];
+			response.message = template.compile(content)({
+				rows: rows,
+				foo: 'bar' });
+			
+			this._controller.trigger('server-response', request, response);	
+		});
 	};
 	
 	/* Protected Methods
